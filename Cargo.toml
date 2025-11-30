@@ -13,6 +13,7 @@ members = [
 zelana-core = {path = "crates/zelana-core"}
 zelana-net  = {path = "crates/zelana-net"}
 zelana-sdk  = {path = "crates/zelana-sdk"}
+zelana-execution = {path = "crates/zelana-execution"}
 wincode = "0.2.1"
 blake3 = "1.8.2"
 sha2 = "0.10.9"

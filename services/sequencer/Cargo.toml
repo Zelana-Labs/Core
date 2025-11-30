@@ -7,6 +7,10 @@ edition = "2021"
 zelana-core = { workspace = true }
 zelana-net = { workspace = true }
 zelana-sdk = { workspace = true }
+zelana-execution = {workspace = true}
+
+rocksdb = "0.24"
+
 tokio = { workspace = true, features = ["full"] }
 tokio-util = "0.7"
 wincode = { workspace = true }

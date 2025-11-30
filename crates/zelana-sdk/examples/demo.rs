@@ -3,45 +3,40 @@ use zelana_sdk::{TransactionData, ZelanaClient, ZelanaWallet};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    //Setup Logging to see what happens
     std::env::set_var("RUST_LOG", "info");
     env_logger::init();
 
-    println!("CLIENT: Started");
-
-    //Create a fresh Wallet (Identity)
-    let wallet = ZelanaWallet::new_random();
+    // 1. Use a Deterministic Wallet (So we can pre-fund it)
+    // We use a seed of all 7s
+    let seed = [7u8; 64]; 
+    let wallet = ZelanaWallet::from_seed(&seed);
+    
     let my_id = wallet.account_id();
-    println!("CLIENT: Identity created: {}", my_id.to_hex());
+    println!("CLIENT: Identity: {}", my_id.to_hex());
 
-    //Connect to the Sequencer (Handshake happens here)
-    println!("CLIENT: Connecting to Sequencer...");
+    println!("CLIENT: Connecting...");
     let mut client = ZelanaClient::connect("127.0.0.1:9000").await?;
-    println!("CLIENT: Secure Session Established!");
+    println!("CLIENT: Connected!");
 
-    //Simulating ->
-    //Send a stream of transactions (Simulating HFT)
-    for i in 1..=5 {
-        println!("CLIENT: Sending Tx #{}...", i);
+    // 2. Send Txs starting from Nonce 0
+    // We send 5 transactions: Nonce 0, 1, 2, 3, 4
+    for i in 0..5 {
+        println!("CLIENT: Sending Tx #{} (Nonce: {})...", i+1, i);
 
-        //Construct the Intent
         let tx_data = TransactionData {
             from: my_id,
-            to: my_id, // Sending to self for testing
-            amount: i * 10,
-            nonce: i,
+            to: my_id, // Self-transfer
+            amount: 10,
+            nonce: i, // <--- CORRECT: Starts at 0
             chain_id: 1,
         };
 
-        //Sign it (Ed25519)
         let signed_tx = wallet.sign_transaction(tx_data);
-
-        //Encrypt & Broadcast (UDP)
         client.send_transaction(signed_tx).await?;
-
-        sleep(Duration::from_millis(500)).await;
+        
+        sleep(Duration::from_millis(200)).await;
     }
 
-    println!("👤 CLIENT: Finished sending transactions.");
+    println!("CLIENT: Done.");
     Ok(())
 }

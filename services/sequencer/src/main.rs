@@ -1,13 +1,16 @@
 mod executor;
 mod session;
+mod db;
 
+use ed25519_dalek::SigningKey;
 use executor::TransactionExecutor;
 use log::{debug, error, info, warn};
 use session::SessionManager;
+use zelana_execution::AccountState;
 use std::sync::Arc;
 use tokio::net::UdpSocket;
-use x25519_dalek::PublicKey;
-use zelana_core::{L2Transaction, SignedTransaction};
+use x25519_dalek::{PublicKey, StaticSecret};
+use zelana_core::{IdentityKeys, L2Transaction, SignedTransaction};
 use zelana_net::{
     protocol::Packet, EphemeralKeyPair, SessionKeys, KIND_APP_DATA, KIND_CLIENT_HELLO,
     KIND_SERVER_HELLO,
@@ -26,9 +29,35 @@ async fn main() -> anyhow::Result<()> {
 
     //Initialize State
     let sessions = Arc::new(SessionManager::new());
-    let executor = TransactionExecutor::new();
+    let executor = TransactionExecutor::new("./data/sequencer_db")?;
+
+    {
+        // 1. Re-derive the ID from the same seed [7u8; 64]
+        let seed = [7u8; 64];
+        let sign_seed: [u8; 32] = seed[0..32].try_into().unwrap();
+        let enc_seed: [u8; 32] = seed[32..64].try_into().unwrap();
+
+        let sign_sk = SigningKey::from_bytes(&sign_seed);
+        let enc_sk = StaticSecret::from(enc_seed);
+        let keys = IdentityKeys {
+            signer_pk: sign_sk.verifying_key().to_bytes(),
+            privacy_pk: *PublicKey::from(&enc_sk).as_bytes(),
+        };
+        let whale_id = keys.derive_id();
+
+        // 2. Inject 1 Million tokens
+        // We use a new block to drop the 'store' mutable borrow immediately
+        let mut store = executor.db.clone(); // Clone the Arc/wrapper
+        zelana_execution::StateStore::set_account(
+            &mut store, 
+            whale_id, 
+            AccountState { balance: 1_000_000, nonce: 0 }
+        )?;
+        info!("Genesis: Funded {} with 1M tokens", whale_id.to_hex());
+    }
 
     let mut buf = [0u8; MAX_DATAGRAM_SIZE];
+
 
     loop {
         //Receive Packet
