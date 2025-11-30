@@ -8,6 +8,7 @@ members = [
     "services/sequencer",
     "guests/sp1-prover",
     "guests/sp1-prover/script",
+    "crates/sp1-utils",
     "tools"
 ]
 
@@ -16,6 +17,7 @@ zelana-core = {path = "crates/zelana-core"}
 zelana-net  = {path = "crates/zelana-net"}
 zelana-sdk  = {path = "crates/zelana-sdk"}
 zelana-execution = {path = "crates/zelana-execution"}
+sp1-utils = { path = "crates/sp1-utils"}
 wincode = "0.2.1"
 blake3 = "1.8.2"
 sha2 = "0.10.9"

@@ -3478,6 +3478,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "json"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
+
+[[package]]
 name = "jubjub"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6019,6 +6025,7 @@ dependencies = [
  "serde_json",
  "sp1-build",
  "sp1-sdk",
+ "sp1-utils",
  "tokio",
  "wincode",
  "wincode-derive",
@@ -6112,6 +6119,15 @@ dependencies = [
  "strum",
  "sysinfo",
  "tracing",
+]
+
+[[package]]
+name = "sp1-utils"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "sp1-sdk",
+ "wincode",
 ]
 
 [[package]]
@@ -6649,8 +6665,9 @@ name = "tools"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "clap",
  "hex",
- "serde_json",
+ "json",
  "wincode",
  "zelana-core",
 ]

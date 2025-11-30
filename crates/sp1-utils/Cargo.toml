@@ -1,0 +1,9 @@
+[package]
+name = "sp1-utils"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sp1-sdk = "5.2.3"
+wincode = {workspace = true}
+anyhow = {workspace = true}

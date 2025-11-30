@@ -14,6 +14,12 @@ impl AccountId {
     }
 }
 
+impl AsRef<[u8]> for AccountId {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
+
 impl fmt::Debug for AccountId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "AccountId({})", self.to_hex())

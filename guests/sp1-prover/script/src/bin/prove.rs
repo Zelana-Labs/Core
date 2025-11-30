@@ -5,7 +5,7 @@ use anyhow::Context;
 use std::io::{BufReader, Read};
 use clap::Parser;
 
-use sp1_script::sp1_wincode::SP1StdinWincode;
+use sp1_utils::SP1StdinWincode;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -59,7 +59,7 @@ async fn main() -> anyhow::Result<()> {
     
     //Setup SP1 Inputs
     let mut stdin = SP1Stdin::new();
-    stdin.write_slice(&bytes);
+    stdin.write_wincode_bytes(&bytes)?;
 
     let guest_elf_bytes: Vec<u8> = if let Some(p) = args.guest_elf.as_deref() {
         std::fs::read(p)
