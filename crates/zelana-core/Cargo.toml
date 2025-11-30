@@ -1,0 +1,15 @@
+[package]
+name = "zelana-core"
+version = "0.1.0"
+edition = "2021"
+description = "Shared types and cryptographic primitives for the Zelana Rollup"
+
+[dependencies]
+sha2 = { workspace = true }
+blake3 = { workspace = true }
+ed25519-dalek = { workspace = true}
+x25519-dalek = { workspace = true, features = ["static_secrets"] }
+thiserror = { workspace = true }
+hex = "0.4"
+wincode = {workspace = true}
+wincode-derive = {workspace = true}

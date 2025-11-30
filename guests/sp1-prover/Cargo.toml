@@ -1,0 +1,5 @@
+[package]
+name = "sp1-prover"
+version = "0.1.0"
+edition = "2021"
+description = "Client SDK for building applications on Zelana"

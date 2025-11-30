@@ -1,0 +1,11 @@
+[package]
+name = "zelana-execution"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zelana-core = { workspace = true }
+wincode = {workspace = true}
+wincode-derive = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }

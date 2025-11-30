@@ -1,0 +1,18 @@
+[package]
+name = "zelana-sequencer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zelana-core = { workspace = true }
+zelana-net = { workspace = true }
+zelana-sdk = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tokio-util = "0.7"
+wincode = { workspace = true }
+ed25519-dalek = { workspace = true }
+x25519-dalek = { workspace = true }
+anyhow = { workspace = true }
+dashmap = "5.5" # Concurrent HashMap for session management
+log = "0.4"
+env_logger = "0.10"
