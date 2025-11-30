@@ -2,4 +2,11 @@
 name = "sp1-prover"
 version = "0.1.0"
 edition = "2021"
-description = "Client SDK for building applications on Zelana"
+
+[dependencies]
+sp1-zkvm = "5.2.3"
+zelana-core = { workspace = true }
+zelana-execution = { workspace = true }
+wincode = { workspace = true}
+blake3 = { workspace = true }
+anyhow = {workspace = true}

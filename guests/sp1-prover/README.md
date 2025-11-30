@@ -6,8 +6,6 @@ This crate contains the **Guest Program**—the actual Rust logic that runs insi
 
 ## Concept
 
-Unlike traditional ZK rollups that require writing circuits in domain-specific languages (Circom, Halo2), Zelana uses **SP1** to prove standard Rust code.
-
 * **The Sequencer** runs the Execution Engine on x86/ARM hardware (Fast).
 * **The Prover** runs the *exact same* Execution Engine code inside the RISC-V zkVM (Verifiable).
 

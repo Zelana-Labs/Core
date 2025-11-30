@@ -1,0 +1,23 @@
+[package]
+name = "sp1-script"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sp1-sdk = "5.2.3"
+zelana-core = { workspace = true }
+zelana-execution = { workspace = true }
+
+# Utils
+wincode = { workspace = true}
+wincode-derive = {workspace = true}
+clap = { version = "4.0", features = ["derive"] }
+tokio = { workspace = true, features = ["full"] }
+anyhow = { workspace = true }
+hex = "0.4"
+ed25519-dalek = {workspace = true}
+x25519-dalek = {workspace = true}
+serde_json = {workspace = true}
+
+[build-dependencies]
+sp1-build = "5.2.3"

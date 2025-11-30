@@ -13,3 +13,4 @@ thiserror = { workspace = true }
 hex = "0.4"
 wincode = {workspace = true}
 wincode-derive = {workspace = true}
+serde = "1.0.228"

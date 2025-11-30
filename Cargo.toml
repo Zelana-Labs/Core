@@ -7,6 +7,8 @@ members = [
     "crates/zelana-execution",
     "services/sequencer",
     "guests/sp1-prover",
+    "guests/sp1-prover/script",
+    "tools"
 ]
 
 [workspace.dependencies]
@@ -25,5 +27,5 @@ wincode-derive = "0.2.0"
 tokio = { version = "1.48.0" , features = ["full"]}
 anyhow = "1.0.100"
 thiserror = "2.0.17"
-
+serde_json = "1.0.145"
 sp1-zkvm = "5.2.3"
