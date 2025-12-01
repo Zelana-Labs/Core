@@ -2,6 +2,7 @@ use zelana_core::{
     prover::{BatchInput, AccountData},
     IdentityKeys, TransactionData, SignedTransaction, L2Transaction
 };
+use zelana_execution::ZkMemStore;
 use std::io::Write;
 use ed25519_dalek::{SigningKey, ed25519::signature::SignerMut};
 use x25519_dalek::{StaticSecret, PublicKey as XPub};
@@ -23,6 +24,11 @@ fn main() -> anyhow::Result<()> {
     // 2. Create Initial State (Witness)
     let mut witness = HashMap::new();
     witness.insert(my_id, AccountData { balance: 1000, nonce: 0 });
+
+    // We clone the witness map because ZkMemStore consumes it (or you can clone inside new)
+    let store = ZkMemStore::new(witness.clone());
+    let pre_root = store.compute_root();
+    println!("Calculated Pre-Root: {:?}", pre_root);
 
     // 3. Create Transactions
     let tx_data = TransactionData {
@@ -54,9 +60,6 @@ fn main() -> anyhow::Result<()> {
     // The easiest way is to let the Guest run once, panic with "Expected X got Y", and copy Y.
     // OR, we move `simple_store` to `zelana-execution` so we can use it here.
     
-    // Let's assume a dummy root for now and see the Guest panic (Good debugging exercise).
-    let pre_root = [0u8; 32]; 
-
     let input = BatchInput {
         pre_state_root: pre_root,
         transactions: vec![L2Transaction::Transfer(signed)],

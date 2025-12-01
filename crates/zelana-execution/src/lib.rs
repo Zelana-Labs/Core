@@ -1,8 +1,10 @@
 pub mod storage;
 pub mod processor;
+pub mod memory;
 
 pub use storage::{StateStore, AccountState};
 pub use processor::BatchExecutor;
+pub use memory::ZkMemStore; 
 
 #[cfg(test)]
 mod tests {

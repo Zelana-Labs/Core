@@ -1,9 +1,8 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
 
-use zelana_core::BatchInput;
-use zelana_execution::BatchExecutor;
-use crate::simple_store::ZkMemStore;
+use zelana_core::prover::BatchInput;
+use zelana_execution::{BatchExecutor, ZkMemStore};
 
 mod simple_store;
 
@@ -19,7 +18,10 @@ pub fn main(){
     //Verify Pre-State Root
     //"Does the witness data match the Root we claimed we started with?"
     let calculated_pre_root = store.compute_root();
+
     if calculated_pre_root != input.pre_state_root {
+       println!("Guest Calc Root: {:?}", calculated_pre_root);
+        println!("Input Pre Root:  {:?}", input.pre_state_root);
         panic!("Fraud Detected: Witness data does not match Pre-State Root!");
     }
     //Execution Loop

@@ -26,7 +26,7 @@ struct Args {
     output: Option<PathBuf>,
 
     /// Pretty-print indentation (number of spaces). Use 0 for compact single-line JSON.
-    #[arg(short = 'i', long, default_value_t = 4)]
+    #[arg(short = 'n', long, default_value_t = 4)]
     indent: usize,
 }
 

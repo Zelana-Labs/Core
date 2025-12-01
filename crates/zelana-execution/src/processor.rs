@@ -1,6 +1,6 @@
-use crate::storage::{AccountState,StateStore};
+use crate::storage::{StateStore};
 use zelana_core::{
-    L2Transaction,SignedTransaction,DepositEvent,identity::AccountId,transaction::WithdrawRequest
+    L2Transaction,SignedTransaction,DepositEvent,transaction::WithdrawRequest
 };
 use anyhow::{Result,bail};
 
