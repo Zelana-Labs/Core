@@ -1,13 +1,14 @@
 mod executor;
 mod session;
 mod db;
+mod ingest;
 
 use ed25519_dalek::SigningKey;
 use executor::TransactionExecutor;
 use log::{debug, error, info, warn};
 use session::SessionManager;
 use zelana_execution::AccountState;
-use std::sync::Arc;
+use std::{env, sync::Arc};
 use tokio::net::UdpSocket;
 use x25519_dalek::{PublicKey, StaticSecret};
 use zelana_core::{IdentityKeys, L2Transaction, SignedTransaction};
@@ -31,33 +32,17 @@ async fn main() -> anyhow::Result<()> {
     let sessions = Arc::new(SessionManager::new());
     let executor = TransactionExecutor::new("./data/sequencer_db")?;
 
-    {
-        // 1. Re-derive the ID from the same seed [7u8; 64]
-        let seed = [7u8; 64];
-        let sign_seed: [u8; 32] = seed[0..32].try_into().unwrap();
-        let enc_seed: [u8; 32] = seed[32..64].try_into().unwrap();
+    let db_handle = executor.db.clone();
+    tokio::spawn(async move{
+        let bridge_id = env::var("BRIDGE_PROGRAM_ID")
+            .unwrap_or_else(|_| "GuiZ...".to_string());
+        let wss_url = env::var("SOLANA_WSS_URL")
+            .unwrap_or_else(|_| "ws://127.0.0.1:8900".to_string());
 
-        let sign_sk = SigningKey::from_bytes(&sign_seed);
-        let enc_sk = StaticSecret::from(enc_seed);
-        let keys = IdentityKeys {
-            signer_pk: sign_sk.verifying_key().to_bytes(),
-            privacy_pk: *PublicKey::from(&enc_sk).as_bytes(),
-        };
-        let whale_id = keys.derive_id();
-
-        // 2. Inject 1 Million tokens
-        // We use a new block to drop the 'store' mutable borrow immediately
-        let mut store = executor.db.clone(); // Clone the Arc/wrapper
-        zelana_execution::StateStore::set_account(
-            &mut store, 
-            whale_id, 
-            AccountState { balance: 1_000_000, nonce: 0 }
-        )?;
-        info!("Genesis: Funded {} with 1M tokens", whale_id.to_hex());
-    }
+        ingest::start_indexer(db_handle, wss_url, bridge_id).await;
+    });
 
     let mut buf = [0u8; MAX_DATAGRAM_SIZE];
-
 
     loop {
         //Receive Packet
@@ -133,7 +118,7 @@ async fn main() -> anyhow::Result<()> {
             }
 
             Err(e) => {
-                warn!("🗑️ Malformed packet from {}: {}", peer, e);
+                warn!("Malformed packet from {}: {}", peer, e);
             }
         }
     }

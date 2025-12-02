@@ -20,7 +20,7 @@ async fn main() -> anyhow::Result<()> {
 
     // 2. Send Txs starting from Nonce 0
     // We send 5 transactions: Nonce 0, 1, 2, 3, 4
-    for i in 0..5 {
+    for i in 5..10 {
         println!("CLIENT: Sending Tx #{} (Nonce: {})...", i+1, i);
 
         let tx_data = TransactionData {

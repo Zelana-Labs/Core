@@ -18,3 +18,8 @@ services/sequencer/logs/
 *.swp
 
 .env
+
+test-ledger
+
+data
+data/sequencer_db
