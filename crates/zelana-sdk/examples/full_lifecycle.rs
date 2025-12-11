@@ -1,4 +1,7 @@
+use borsh::BorshSerialize;
+use ed25519_dalek::{Signer as EdSigner, SigningKey};
 use solana_client::rpc_client::RpcClient;
+use solana_commitment_config::CommitmentConfig;
 use solana_sdk::{
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
@@ -6,14 +9,11 @@ use solana_sdk::{
     signer::EncodableKey,
     transaction::Transaction,
 };
-use solana_commitment_config::CommitmentConfig;
-use std::str::FromStr;
 use std::env;
+use std::str::FromStr;
 use std::time::Duration;
 use tokio::time::sleep;
-use zelana_sdk::{ZelanaClient, TransactionData, SignedTransaction, AccountId};
-use ed25519_dalek::{SigningKey, Signer as EdSigner};
-use borsh::BorshSerialize;
+use zelana_sdk::{AccountId, SignedTransaction, TransactionData, ZelanaClient};
 
 // Bridge Params
 #[derive(BorshSerialize)]
@@ -29,14 +29,15 @@ async fn main() -> anyhow::Result<()> {
 
     // --- CONFIG ---
     let rpc_url = "http://127.0.0.1:8899";
-    let bridge_id_str = env::var("BRIDGE_PROGRAM_ID").expect("BRIDGE_PROGRAM_ID required");
+    let bridge_id_str = env::var("BRIDGE_PROGRAM_ID")
+        .unwrap_or_else(|_| "DouWDzYTAxi5c3ui695xqozJuP9SpAutDcTbyQnkAguo".to_string());
     let program_id = Pubkey::from_str(&bridge_id_str)?;
     let sequencer_url = "127.0.0.1:9000";
 
     // 1. Setup Identity (We use one key for L1 and L2)
     let user = Keypair::new();
     println!("👤 User Identity: {}", user.pubkey());
-    
+
     // We map the L1 Pubkey directly to L2 Account ID (matching the Ingest logic)
     let mut acc_bytes = [0u8; 32];
     acc_bytes.copy_from_slice(user.pubkey().as_ref());
@@ -53,13 +54,19 @@ async fn main() -> anyhow::Result<()> {
     // 3. DEPOSIT to L2 (1 SOL)
     println!("🚀 Depositing 1 SOL to Bridge...");
     let (config_pda, _) = Pubkey::find_program_address(&[b"config"], &program_id);
-    let (vault_pda, _) = Pubkey::find_program_address(&[b"vault", config_pda.as_ref()], &program_id);
-    
-    let nonce :u64 = 500; // Unique nonce
+    let (vault_pda, _) =
+        Pubkey::find_program_address(&[b"vault", config_pda.as_ref()], &program_id);
+
+    let nonce: u64 = 500; // Unique nonce
     let nonce_le = nonce.to_le_bytes();
     let (receipt_pda, _) = Pubkey::find_program_address(
-        &[b"receipt", config_pda.as_ref(), user.pubkey().as_ref(), &nonce_le],
-        &program_id
+        &[
+            b"receipt",
+            config_pda.as_ref(),
+            user.pubkey().as_ref(),
+            &nonce_le,
+        ],
+        &program_id,
     );
 
     let amount = 1_000_000_000;
@@ -82,7 +89,10 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let tx = Transaction::new_signed_with_payer(
-        &[ix], Some(&user.pubkey()), &[&user], rpc.get_latest_blockhash()?
+        &[ix],
+        Some(&user.pubkey()),
+        &[&user],
+        rpc.get_latest_blockhash()?,
     );
     rpc.send_and_confirm_transaction(&tx)?;
     println!("✅ Deposit Confirmed on L1.");
@@ -97,7 +107,7 @@ async fn main() -> anyhow::Result<()> {
 
     // 6. Send L2 Transfer (Spending the deposited funds!)
     println!("💸 Sending L2 Transfer...");
-    
+
     // Manually construct SignedTransaction to match the L1 Key
     let tx_data = TransactionData {
         from: my_l2_id,

@@ -1,17 +1,17 @@
-mod executor;
-mod session;
 mod db;
+mod executor;
 mod ingest;
+mod session;
 
 use ed25519_dalek::SigningKey;
 use executor::TransactionExecutor;
 use log::{debug, error, info, warn};
 use session::SessionManager;
-use zelana_execution::AccountState;
 use std::{env, sync::Arc};
 use tokio::net::UdpSocket;
 use x25519_dalek::{PublicKey, StaticSecret};
 use zelana_core::{IdentityKeys, L2Transaction, SignedTransaction};
+use zelana_execution::AccountState;
 use zelana_net::{
     protocol::Packet, EphemeralKeyPair, SessionKeys, KIND_APP_DATA, KIND_CLIENT_HELLO,
     KIND_SERVER_HELLO,
@@ -33,11 +33,12 @@ async fn main() -> anyhow::Result<()> {
     let executor = TransactionExecutor::new("./data/sequencer_db")?;
 
     let db_handle = executor.db.clone();
-    tokio::spawn(async move{
+    tokio::spawn(async move {
         let bridge_id = env::var("BRIDGE_PROGRAM_ID")
-            .unwrap_or_else(|_| "GuiZ...".to_string());
-        let wss_url = env::var("SOLANA_WSS_URL")
-            .unwrap_or_else(|_| "ws://127.0.0.1:8900".to_string());
+            .unwrap_or_else(|_| "DouWDzYTAxi5c3ui695xqozJuP9SpAutDcTbyQnkAguo".to_string());
+
+        let wss_url =
+            env::var("SOLANA_WSS_URL").unwrap_or_else(|_| "ws://127.0.0.1:8900".to_string());
 
         ingest::start_indexer(db_handle, wss_url, bridge_id).await;
     });

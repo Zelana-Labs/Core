@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
     let rpc_url = "http://127.0.0.1:8899";
     // We default to the ID you likely deployed. Change if different!
     let bridge_id_str = env::var("BRIDGE_PROGRAM_ID")
-        .unwrap_or_else(|_| "GuiZ...".to_string()); 
+        .unwrap_or_else(|_| "DouWDzYTAxi5c3ui695xqozJuP9SpAutDcTbyQnkAguo".to_string()); 
     let program_id = Pubkey::from_str(&bridge_id_str)?;
     
     // 2. Setup User (The Depositor)
