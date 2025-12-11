@@ -7,7 +7,6 @@ use {
     zelana_core::{L2Transaction, SignedTransaction},
     zelana_net::{
         protocol::Packet, EphemeralKeyPair, SessionKeys, KIND_APP_DATA, KIND_CLIENT_HELLO,
-        KIND_SERVER_HELLO,
     },
 };
 

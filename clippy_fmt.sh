@@ -2,7 +2,7 @@
 
 echo "Run Fmt+Clippy Fix ...."
 
-cargo fix
+cargo fix --workspace
 
 cargo +nightly fmt --all
 

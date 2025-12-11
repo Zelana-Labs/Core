@@ -1,4 +1,4 @@
-use {anyhow::Context, sp1_sdk::SP1Stdin, wincode::SchemaWrite};
+use {sp1_sdk::SP1Stdin, wincode::SchemaWrite};
 
 /// Extension helpers to write wincode-serialized values into SP1Stdin
 pub trait SP1StdinWincode {

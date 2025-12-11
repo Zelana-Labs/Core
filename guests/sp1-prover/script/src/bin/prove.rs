@@ -2,7 +2,6 @@ use {
     anyhow::Context,
     clap::Parser,
     sp1_sdk::{ProverClient, SP1Stdin},
-    sp1_utils::SP1StdinWincode,
     std::{
         fs::File,
         io::{BufReader, Read},

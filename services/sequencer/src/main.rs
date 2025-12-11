@@ -4,17 +4,15 @@ mod ingest;
 mod session;
 
 use {
-    ed25519_dalek::SigningKey,
     executor::TransactionExecutor,
     log::{debug, error, info, warn},
     session::SessionManager,
     std::{env, sync::Arc},
     tokio::net::UdpSocket,
-    x25519_dalek::{PublicKey, StaticSecret},
-    zelana_core::{IdentityKeys, L2Transaction, SignedTransaction},
-    zelana_execution::AccountState,
+    x25519_dalek::PublicKey,
+    zelana_core::{L2Transaction, SignedTransaction},
     zelana_net::{
-        protocol::Packet, EphemeralKeyPair, SessionKeys, KIND_APP_DATA, KIND_CLIENT_HELLO,
+        protocol::Packet, EphemeralKeyPair, SessionKeys,
         KIND_SERVER_HELLO,
     },
 };
