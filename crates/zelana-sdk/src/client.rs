@@ -59,7 +59,7 @@ impl ZelanaClient {
         let shared = my_keys.sk.diffie_hellman(&server_public);
         let shared_secret: [u8; 32] = shared.to_bytes();
 
-        let session = SessionKeys::derive(shared_secret, &my_pub_bytes, &server_pk_bytes);
+        let session = SessionKeys::derive(shared_secret, &my_pub_bytes, server_pk_bytes);
         Ok(Self {
             socket,
             server_addr: server_addr.to_string(),

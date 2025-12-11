@@ -40,8 +40,8 @@ impl IdentityKeys {
     /// Formula: SHA256( signer_pk_bytes || privacy_pk_bytes )
     pub fn derive_id(&self) -> AccountId {
         let mut hasher = Sha256::new();
-        hasher.update(&self.signer_pk);
-        hasher.update(&self.privacy_pk);
+        hasher.update(self.signer_pk);
+        hasher.update(self.privacy_pk);
         AccountId(hasher.finalize().into())
     }
 }

@@ -35,14 +35,14 @@ fn signed_tx_to_json(signed: &SignedTransaction) -> JsonValue {
     let d = &signed.data;
     object! {
         "data" => object!{
-            "from" => hex::encode(&d.from),
-            "to" => hex::encode(&d.to),
+            "from" => hex::encode(d.from),
+            "to" => hex::encode(d.to),
             "amount" => d.amount,
             "nonce" => d.nonce,
             "chain_id" => d.chain_id,
         },
         "signature" => hex::encode(&signed.signature),
-        "signer_pubkey" => hex::encode(&signed.signer_pubkey),
+        "signer_pubkey" => hex::encode(signed.signer_pubkey),
     }
 }
 
@@ -85,7 +85,7 @@ fn write_output(output: &Option<PathBuf>, s: &str) -> anyhow::Result<()> {
 
 fn batch_to_json_string(batch: &BatchInput, indent: usize) -> String {
     let mut root = object! {
-        "pre_state_root" => hex::encode(&batch.pre_state_root),
+        "pre_state_root" => hex::encode(batch.pre_state_root),
         "transactions" => JsonValue::new_array(),
         "witness_accounts" => JsonValue::new_object(),
     };

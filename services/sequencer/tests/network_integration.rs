@@ -32,26 +32,22 @@ async fn test_e2e_handshake_and_tx() {
             let (len, peer) = socket.recv_from(&mut buf).await.unwrap();
             let data = &buf[..len];
 
-            match Packet::parse(data) {
-                Ok(Packet::ClientHello { public_key }) => {
-                    // Generate keys
-                    let server_keys = EphemeralKeyPair::generate();
-                    let server_pub = *server_keys.pk.as_bytes();
+            if let Ok(Packet::ClientHello { public_key }) = Packet::parse(data) {
+                // Generate keys
+                let server_keys = EphemeralKeyPair::generate();
+                let server_pub = *server_keys.pk.as_bytes();
 
-                    // Compute shared secret (ECDH)
-                    let client_pub = PublicKey::from(*public_key);
-                    let shared = server_keys.sk.diffie_hellman(&client_pub);
-                    let _shared_secret = shared.to_bytes();
+                // Compute shared secret (ECDH)
+                let client_pub = PublicKey::from(*public_key);
+                let shared = server_keys.sk.diffie_hellman(&client_pub);
+                let _shared_secret = shared.to_bytes();
 
-                    // Reply: ServerHello
-                    let mut resp = Vec::with_capacity(33);
-                    resp.push(KIND_SERVER_HELLO);
-                    resp.extend_from_slice(&server_pub);
+                // Reply: ServerHello
+                let mut resp = Vec::with_capacity(33);
+                resp.push(KIND_SERVER_HELLO);
+                resp.extend_from_slice(&server_pub);
 
-                    socket.send_to(&resp, peer).await.unwrap();
-                }
-
-                _ => {}
+                socket.send_to(&resp, peer).await.unwrap();
             }
         }
     });
