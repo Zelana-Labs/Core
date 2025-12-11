@@ -11,10 +11,7 @@ use {
     tokio::net::UdpSocket,
     x25519_dalek::PublicKey,
     zelana_core::{L2Transaction, SignedTransaction},
-    zelana_net::{
-        protocol::Packet, EphemeralKeyPair, SessionKeys,
-        KIND_SERVER_HELLO,
-    },
+    zelana_net::{protocol::Packet, EphemeralKeyPair, SessionKeys, KIND_SERVER_HELLO},
 };
 
 const MAX_DATAGRAM_SIZE: usize = 1500; // Standard MTU safe limit
