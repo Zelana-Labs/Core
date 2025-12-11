@@ -1,23 +1,19 @@
-use log::{info,error,warn};
-use regex::Regex;
-use solana_sdk::pubkey::Pubkey;
-use solana_client::rpc_config::{
-    RpcTransactionLogsConfig,RpcTransactionLogsFilter
+use {
+    crate::db::RocksDbStore,
+    log::{error, info, warn},
+    solana_client::{
+        nonblocking::pubsub_client::PubsubClient,
+        rpc_config::{RpcTransactionLogsConfig, RpcTransactionLogsFilter},
+    },
+    solana_commitment_config::CommitmentConfig,
+    solana_pubkey::Pubkey,
+    std::str::FromStr,
+    tokio_stream::StreamExt,
+    zelana_core::{AccountId, DepositEvent},
+    zelana_execution::StateStore,
 };
-use tokio_stream::StreamExt;
-use solana_client::nonblocking::pubsub_client::PubsubClient;
-use solana_commitment_config::CommitmentConfig;
-use std::str::FromStr;
-use zelana_core::{DepositEvent,AccountId,IdentityKeys};
-use zelana_execution::StateStore;
 
-use crate::db::RocksDbStore;
-
-pub async fn start_indexer(
-    db: RocksDbStore, 
-    ws_url: String, 
-    bridge_program_id: String
-) {
+pub async fn start_indexer(db: RocksDbStore, ws_url: String, bridge_program_id: String) {
     info!("🔭 Indexer started. Watching: {}", bridge_program_id);
 
     let pubsub = match PubsubClient::new(&ws_url).await {
@@ -28,12 +24,17 @@ pub async fn start_indexer(
         }
     };
 
-    info!("{:?}",pubsub);
+    info!("{:?}", pubsub);
 
-    let (mut stream, _unsub) = match pubsub.logs_subscribe(
-        RpcTransactionLogsFilter::Mentions(vec![bridge_program_id]),
-        RpcTransactionLogsConfig { commitment: Some(CommitmentConfig::confirmed()) }
-    ).await {
+    let (mut stream, _unsub) = match pubsub
+        .logs_subscribe(
+            RpcTransactionLogsFilter::Mentions(vec![bridge_program_id]),
+            RpcTransactionLogsConfig {
+                commitment: Some(CommitmentConfig::confirmed()),
+            },
+        )
+        .await
+    {
         Ok(s) => s,
         Err(e) => {
             error!("Failed to subscribe to logs: {}", e);
@@ -44,11 +45,11 @@ pub async fn start_indexer(
     while let Some(response) = stream.next().await {
         for log in response.value.logs {
             // Check for our specific log prefix
-            info!("{}",log);
+            info!("{}", log);
             if let Some(payload) = log.strip_prefix("Program log: ZE_DEPOSIT:") {
-                info!("{}",payload);
+                info!("{}", payload);
                 if let Some(event) = parse_deposit_log(payload) {
-                    info!("{:?}",event);
+                    info!("{:?}", event);
                     process_deposit(&db, event);
                 }
             }
@@ -65,7 +66,7 @@ fn parse_deposit_log(payload: &str) -> Option<DepositEvent> {
     }
     let pubkey_str = parts[0];
     let pubkey = parse_log_pubkey(pubkey_str)?;
-    
+
     let amount = parts[1].parse::<u64>().ok()?;
     let nonce = parts[2].parse::<u64>().ok()?;
 
@@ -80,10 +81,10 @@ fn parse_deposit_log(payload: &str) -> Option<DepositEvent> {
 fn process_deposit(db: &RocksDbStore, event: DepositEvent) {
     // 1. Load Account (or create new)
     let mut account = db.get_account(&event.to).unwrap_or_default();
-    
+
     // 2. Credit Balance
     account.balance = account.balance.saturating_add(event.amount);
-    
+
     // 3. Save
     // Note: In production, store the 'l1_seq' to prevent re-processing the same deposit!
     // For MVP, direct addition is fine.
@@ -97,21 +98,21 @@ fn process_deposit(db: &RocksDbStore, event: DepositEvent) {
 
 fn parse_log_pubkey(log_val: &str) -> Option<Pubkey> {
     let log_val = log_val.trim();
-    
+
     if log_val.starts_with('[') {
         let bytes_str = log_val.trim_matches(|c| c == '[' || c == ']');
         let bytes: Result<Vec<u8>, _> = bytes_str
             .split(',')
             .map(|s| s.trim().parse::<u8>())
             .collect();
-            
+
         if let Ok(vec) = bytes {
             if vec.len() == 32 {
                 return Some(Pubkey::new_from_array(vec.try_into().unwrap()));
             }
         }
     }
-    
+
     Pubkey::from_str(log_val).ok()
 }
 

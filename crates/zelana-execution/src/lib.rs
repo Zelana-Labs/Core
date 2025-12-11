@@ -1,16 +1,20 @@
-pub mod storage;
-pub mod processor;
 pub mod memory;
+pub mod processor;
+pub mod storage;
 
-pub use storage::{StateStore, AccountState};
-pub use processor::BatchExecutor;
-pub use memory::ZkMemStore; 
+pub use {
+    memory::ZkMemStore,
+    processor::BatchExecutor,
+    storage::{AccountState, StateStore},
+};
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use std::collections::HashMap;
-    use zelana_core::{TransactionData, SignedTransaction, identity::AccountId};
+    use {
+        super::*,
+        std::collections::HashMap,
+        zelana_core::{identity::AccountId, SignedTransaction, TransactionData},
+    };
 
     //Mock Store (In-Memory)
     struct MockStore {
@@ -29,12 +33,22 @@ mod tests {
 
     #[test]
     fn test_transfer_execution() {
-        let mut store = MockStore { accounts: HashMap::new() };
+        let mut store = MockStore {
+            accounts: HashMap::new(),
+        };
         let alice = AccountId([1u8; 32]);
         let bob = AccountId([2u8; 32]);
 
         // Setup: Give Alice money
-        store.set_account(alice, AccountState { balance: 100, nonce: 0 }).unwrap();
+        store
+            .set_account(
+                alice,
+                AccountState {
+                    balance: 100,
+                    nonce: 0,
+                },
+            )
+            .unwrap();
 
         // Action: Alice sends 50 to Bob
         let tx_data = TransactionData {
@@ -47,12 +61,14 @@ mod tests {
         // NOTE: In this test we mock signature, as Executor assumes sig verified earlier
         let signed = SignedTransaction {
             data: tx_data,
-            signature: vec![], 
+            signature: vec![],
             signer_pubkey: [0u8; 32],
         };
 
         let mut executor = BatchExecutor::new(&mut store);
-        executor.execute(&zelana_core::L2Transaction::Transfer(signed)).unwrap();
+        executor
+            .execute(&zelana_core::L2Transaction::Transfer(signed))
+            .unwrap();
 
         // Verify Alice
         let alice_state = store.get_account(&alice).unwrap();

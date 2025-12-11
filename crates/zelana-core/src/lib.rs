@@ -1,8 +1,10 @@
 pub mod crypto;
 pub mod identity;
-pub mod transaction;
 pub mod prover;
+pub mod transaction;
 
-pub use identity::{AccountId, IdentityKeys};
-pub use transaction::{DepositEvent, L2Transaction, SignedTransaction, TransactionData};
-pub use prover::{BatchInput,AccountData};
+pub use {
+    identity::{AccountId, IdentityKeys},
+    prover::{AccountData, BatchInput},
+    transaction::{DepositEvent, L2Transaction, SignedTransaction, TransactionData},
+};

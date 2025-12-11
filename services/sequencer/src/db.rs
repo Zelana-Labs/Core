@@ -1,10 +1,10 @@
-use rocksdb::{DB,Options,ColumnFamilyDescriptor};
-use std::path::Path;
-use std::sync::Arc;
-use wincode::deserialize;
-use anyhow::{Result,Context};
-use zelana_core::AccountId;
-use zelana_execution::{StateStore,AccountState};
+use {
+    anyhow::{Context, Result},
+    rocksdb::{ColumnFamilyDescriptor, Options, DB},
+    std::{path::Path, sync::Arc},
+    zelana_core::AccountId,
+    zelana_execution::{AccountState, StateStore},
+};
 
 const CF_ACCOUNTS: &str = "accounts";
 
@@ -22,22 +22,20 @@ impl RocksDbStore {
         opts.create_missing_column_families(true);
 
         let cf_opts = Options::default();
-        let families = vec![
-            ColumnFamilyDescriptor::new(CF_ACCOUNTS, cf_opts),
-        ];
+        let families = vec![ColumnFamilyDescriptor::new(CF_ACCOUNTS, cf_opts)];
 
         let db = DB::open_cf_descriptors(&opts, path, families)
             .map_err(|e| anyhow::anyhow!("Failed to open RocksDB: {}", e))?;
 
-        Ok(Self {
-            db: Arc::new(db),
-        })
+        Ok(Self { db: Arc::new(db) })
     }
 }
 
 impl StateStore for RocksDbStore {
     fn get_account(&self, id: &AccountId) -> Result<AccountState> {
-        let cf = self.db.cf_handle(CF_ACCOUNTS)
+        let cf = self
+            .db
+            .cf_handle(CF_ACCOUNTS)
             .context("Column family 'accounts' missing")?;
 
         // Key is the 32-byte AccountId directly
@@ -51,11 +49,13 @@ impl StateStore for RocksDbStore {
     }
 
     fn set_account(&mut self, id: AccountId, state: AccountState) -> Result<()> {
-        let cf = self.db.cf_handle(CF_ACCOUNTS)
+        let cf = self
+            .db
+            .cf_handle(CF_ACCOUNTS)
             .context("Column family 'accounts' missing")?;
 
         let bytes = wincode::serialize(&state)?;
-        
+
         self.db.put_cf(cf, id.0, bytes)?;
         Ok(())
     }

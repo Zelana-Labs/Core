@@ -1,10 +1,14 @@
-use sp1_sdk::{ProverClient, SP1Stdin};
-use zelana_core::prover::BatchInput;
-use std::fs::File;
-use anyhow::Context;
-use std::io::{BufReader, Read};
-use clap::Parser;
-use sp1_utils::SP1StdinWincode;
+use {
+    anyhow::Context,
+    clap::Parser,
+    sp1_sdk::{ProverClient, SP1Stdin},
+    sp1_utils::SP1StdinWincode,
+    std::{
+        fs::File,
+        io::{BufReader, Read},
+    },
+    zelana_core::prover::BatchInput,
+};
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -46,15 +50,18 @@ async fn main() -> anyhow::Result<()> {
 
     //Execute (Fast Mode - No Proof) first to check logic
     println!("Simulating execution...");
-    let (_, report) = client.execute(GUEST_ELF, &stdin.clone())
+    let (_, report) = client
+        .execute(GUEST_ELF, &stdin.clone())
         .run()
         .expect("Execution failed inside ZKVM. Check your Guest logic!");
 
-    println!("Simulation Successful! Cycles: {}", report.total_instruction_count());
+    println!(
+        "Simulation Successful! Cycles: {}",
+        report.total_instruction_count()
+    );
 
     println!("Generating Proof...");
-    let proof = client.prove(&pk, &stdin).run()
-        .expect("Proving failed");
+    let proof = client.prove(&pk, &stdin).run().expect("Proving failed");
 
     println!("Proof Generated!");
     proof.save("proof-with-io.bin")?;

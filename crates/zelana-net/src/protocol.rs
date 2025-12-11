@@ -1,5 +1,7 @@
-use crate::{KIND_APP_DATA, KIND_CLIENT_HELLO, KIND_SERVER_HELLO};
-use anyhow::{bail, Result};
+use {
+    crate::{KIND_APP_DATA, KIND_CLIENT_HELLO, KIND_SERVER_HELLO},
+    anyhow::{bail, Result},
+};
 
 #[derive(Debug)]
 pub enum Packet<'a> {

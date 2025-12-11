@@ -1,5 +1,7 @@
-use blake3::Hasher as Blake3Hasher;
-use wincode::{serialize, SchemaWrite};
+use {
+    blake3::Hasher as Blake3Hasher,
+    wincode::{serialize, SchemaWrite},
+};
 
 /// The standard hash function for the Protocol.
 /// Currently BLAKE3 (Fastest on CPU, SP1-friendly).

@@ -1,10 +1,12 @@
-use chacha20poly1305::{
-    aead::{rand_core::OsRng, Aead, KeyInit},
-    ChaCha20Poly1305, Key, Nonce,
+use {
+    chacha20poly1305::{
+        aead::{rand_core::OsRng, Aead, KeyInit},
+        ChaCha20Poly1305, Key, Nonce,
+    },
+    hkdf::Hkdf,
+    sha2::{Digest, Sha256},
+    x25519_dalek::{EphemeralSecret, PublicKey},
 };
-use hkdf::Hkdf;
-use sha2::{Digest, Sha256};
-use x25519_dalek::{EphemeralSecret, PublicKey};
 
 /// A temporary keypair generated for every new connection session.
 pub struct EphemeralKeyPair {

@@ -1,9 +1,11 @@
-use chacha20poly1305::aead::OsRng;
-use ed25519_dalek::{Signer, SigningKey};
-use x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret};
-use zelana_core::{
-    identity::{AccountId, IdentityKeys},
-    transaction::{SignedTransaction, TransactionData},
+use {
+    chacha20poly1305::aead::OsRng,
+    ed25519_dalek::{Signer, SigningKey},
+    x25519_dalek::{PublicKey as X25519PublicKey, StaticSecret},
+    zelana_core::{
+        identity::{AccountId, IdentityKeys},
+        transaction::{SignedTransaction, TransactionData},
+    },
 };
 
 /// A user's wallet containing private keys.

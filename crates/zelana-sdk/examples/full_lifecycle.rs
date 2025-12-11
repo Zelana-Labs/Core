@@ -1,22 +1,19 @@
-use borsh::BorshSerialize;
-use ed25519_dalek::{Signer as EdSigner, SigningKey};
-use solana_client::rpc_client::RpcClient;
-use solana_commitment_config::CommitmentConfig;
-use solana_sdk::{
-    instruction::{AccountMeta, Instruction},
-    pubkey::Pubkey,
-    signature::{Keypair, Signer},
-    signer::EncodableKey,
-    transaction::Transaction,
+use {
+    ed25519_dalek::{Signer as EdSigner, SigningKey},
+    solana_client::nonblocking::rpc_client::RpcClient,
+    solana_commitment_config::CommitmentConfig,
+    solana_instruction::{AccountMeta, Instruction},
+    solana_keypair::{Keypair, Signer},
+    solana_pubkey::Pubkey,
+    solana_transaction::Transaction,
+    std::{env, str::FromStr, time::Duration},
+    tokio::time::sleep,
+    wincode_derive::SchemaWrite,
+    zelana_sdk::{AccountId, SignedTransaction, TransactionData, ZelanaClient},
 };
-use std::env;
-use std::str::FromStr;
-use std::time::Duration;
-use tokio::time::sleep;
-use zelana_sdk::{AccountId, SignedTransaction, TransactionData, ZelanaClient};
 
 // Bridge Params
-#[derive(BorshSerialize)]
+#[derive(SchemaWrite)]
 struct DepositParams {
     amount: u64,
     nonce: u64,
@@ -24,7 +21,9 @@ struct DepositParams {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    std::env::set_var("RUST_LOG", "info");
+    unsafe {
+        std::env::set_var("RUST_LOG", "info");
+    }
     env_logger::init();
 
     // --- CONFIG ---
@@ -46,8 +45,8 @@ async fn main() -> anyhow::Result<()> {
     // 2. Fund L1 Account (Airdrop)
     println!("💸 Airdropping L1 SOL...");
     let rpc = RpcClient::new_with_commitment(rpc_url.to_string(), CommitmentConfig::confirmed());
-    let sig = rpc.request_airdrop(&user.pubkey(), 2_000_000_000)?;
-    while !rpc.confirm_transaction(&sig)? {
+    let sig = rpc.request_airdrop(&user.pubkey(), 2_000_000_000).await?;
+    while !rpc.confirm_transaction(&sig).await? {
         sleep(Duration::from_millis(100)).await;
     }
 
@@ -72,7 +71,7 @@ async fn main() -> anyhow::Result<()> {
     let amount = 1_000_000_000;
     let params = DepositParams { amount, nonce };
     let mut data = vec![1]; // Deposit Discriminator
-    data.extend(borsh::to_vec(&params)?);
+    data.extend(wincode::serialize(&params)?);
 
     let system_id = Pubkey::from_str("11111111111111111111111111111111")?;
 
@@ -92,9 +91,9 @@ async fn main() -> anyhow::Result<()> {
         &[ix],
         Some(&user.pubkey()),
         &[&user],
-        rpc.get_latest_blockhash()?,
+        rpc.get_latest_blockhash().await?,
     );
-    rpc.send_and_confirm_transaction(&tx)?;
+    rpc.send_and_confirm_transaction(&tx).await?;
     println!("✅ Deposit Confirmed on L1.");
 
     // 4. Wait for Indexer

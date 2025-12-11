@@ -1,12 +1,16 @@
-use std::sync::Once;
-use tokio::time::{sleep, Duration};
-use zelana_sdk::{TransactionData, ZelanaClient, ZelanaWallet};
+use {
+    std::sync::Once,
+    tokio::time::{sleep, Duration},
+    zelana_sdk::{TransactionData, ZelanaClient, ZelanaWallet},
+};
 
 static INIT: Once = Once::new();
 
 fn setup_logs() {
     INIT.call_once(|| {
-        std::env::set_var("RUST_LOG", "debug");
+        unsafe {
+            std::env::set_var("RUST_LOG", "debug");
+        }
         env_logger::init();
     });
 }
@@ -16,9 +20,10 @@ async fn test_e2e_handshake_and_tx() {
     setup_logs();
 
     tokio::spawn(async move {
-        use x25519_dalek::PublicKey;
-        use zelana_net::protocol::Packet;
-        use zelana_net::{EphemeralKeyPair, KIND_SERVER_HELLO};
+        use {
+            x25519_dalek::PublicKey,
+            zelana_net::{protocol::Packet, EphemeralKeyPair, KIND_SERVER_HELLO},
+        };
 
         let socket = tokio::net::UdpSocket::bind("127.0.0.1:9001").await.unwrap();
         let mut buf = [0u8; 1500];

@@ -1,5 +1,7 @@
-use std::time::Instant;
-use zelana_sdk::{TransactionData, ZelanaClient, ZelanaWallet};
+use {
+    std::time::Instant,
+    zelana_sdk::{TransactionData, ZelanaClient, ZelanaWallet},
+};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

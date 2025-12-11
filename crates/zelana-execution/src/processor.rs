@@ -1,14 +1,14 @@
-use crate::storage::{StateStore};
-use zelana_core::{
-    L2Transaction,SignedTransaction,DepositEvent,transaction::WithdrawRequest
+use {
+    crate::storage::StateStore,
+    anyhow::{bail, Result},
+    zelana_core::{transaction::WithdrawRequest, DepositEvent, L2Transaction, SignedTransaction},
 };
-use anyhow::{Result,bail};
 
-pub struct BatchExecutor<'a,S:StateStore>{
-    store: &'a mut S
+pub struct BatchExecutor<'a, S: StateStore> {
+    store: &'a mut S,
 }
 
-impl<'a, S:StateStore> BatchExecutor<'a,S>{
+impl<'a, S: StateStore> BatchExecutor<'a, S> {
     pub fn new(store: &'a mut S) -> Self {
         Self { store }
     }
@@ -23,7 +23,7 @@ impl<'a, S:StateStore> BatchExecutor<'a,S>{
     fn execute_transfer(&mut self, tx: &SignedTransaction) -> Result<()> {
         //Verify Signature
         // In the ZKVM, we assume signature checked by the main loop witness verification.
-        
+
         let from_id = tx.data.from;
         let to_id = tx.data.to;
         let amount = tx.data.amount;
@@ -37,7 +37,11 @@ impl<'a, S:StateStore> BatchExecutor<'a,S>{
             bail!("Nonce mismatch: expected {}, got {}", sender.nonce, nonce);
         }
         if sender.balance < amount {
-            bail!("Insufficient funds: balance {}, needed {}", sender.balance, amount);
+            bail!(
+                "Insufficient funds: balance {}, needed {}",
+                sender.balance,
+                amount
+            );
         }
 
         //Update Sender
@@ -47,7 +51,9 @@ impl<'a, S:StateStore> BatchExecutor<'a,S>{
 
         //Update Recipient
         let mut recipient = self.store.get_account(&to_id)?;
-        recipient.balance = recipient.balance.checked_add(amount)
+        recipient.balance = recipient
+            .balance
+            .checked_add(amount)
             .ok_or_else(|| anyhow::anyhow!("Overflow in recipient balance"))?;
         self.store.set_account(to_id, recipient)?;
 
@@ -58,10 +64,12 @@ impl<'a, S:StateStore> BatchExecutor<'a,S>{
         // Deposits are authoritative "Mint" events from L1.
         // We do not check nonces or signatures (L1 Bridge did that).
         let mut account = self.store.get_account(&deposit.to)?;
-        
-        account.balance = account.balance.checked_add(deposit.amount)
+
+        account.balance = account
+            .balance
+            .checked_add(deposit.amount)
             .ok_or_else(|| anyhow::anyhow!("Overflow in deposit"))?;
-            
+
         self.store.set_account(deposit.to, account)?;
         Ok(())
     }
@@ -79,7 +87,7 @@ impl<'a, S:StateStore> BatchExecutor<'a,S>{
         // Burn funds on L2
         sender.balance -= req.amount;
         sender.nonce += 1;
-        
+
         self.store.set_account(req.from, sender)?;
         Ok(())
     }

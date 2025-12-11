@@ -1,13 +1,14 @@
-use std::fs::File;
-use std::io::{self, Read, Write};
-use std::path::PathBuf;
-
-use anyhow::Context;
-use clap::Parser;
-use json::{object, JsonValue};
-
-use zelana_core::prover::BatchInput;
-use zelana_core::{L2Transaction, SignedTransaction};
+use {
+    anyhow::Context,
+    clap::Parser,
+    json::{object, JsonValue},
+    std::{
+        fs::File,
+        io::{self, Read, Write},
+        path::PathBuf,
+    },
+    zelana_core::{prover::BatchInput, L2Transaction, SignedTransaction},
+};
 
 /// Convert a wincode-serialized BatchInput (batch.bin) into JSON.
 ///
@@ -32,7 +33,7 @@ struct Args {
 
 fn signed_tx_to_json(signed: &SignedTransaction) -> JsonValue {
     let d = &signed.data;
-    object!{
+    object! {
         "data" => object!{
             "from" => hex::encode(&d.from),
             "to" => hex::encode(&d.to),
@@ -47,7 +48,7 @@ fn signed_tx_to_json(signed: &SignedTransaction) -> JsonValue {
 
 fn l2tx_to_json(tx: &L2Transaction) -> JsonValue {
     match tx {
-        L2Transaction::Transfer(signed) => object!{ "Transfer" => signed_tx_to_json(signed) },
+        L2Transaction::Transfer(signed) => object! { "Transfer" => signed_tx_to_json(signed) },
         other => JsonValue::String(format!("{:?}", other)),
     }
 }
@@ -76,16 +77,14 @@ fn write_output(output: &Option<PathBuf>, s: &str) -> anyhow::Result<()> {
         _ => {
             // Write to stdout
             let mut stdout = io::stdout();
-            stdout
-                .write_all(s.as_bytes())
-                .context("write to stdout")?;
+            stdout.write_all(s.as_bytes()).context("write to stdout")?;
             Ok(())
         }
     }
 }
 
 fn batch_to_json_string(batch: &BatchInput, indent: usize) -> String {
-    let mut root = object!{
+    let mut root = object! {
         "pre_state_root" => hex::encode(&batch.pre_state_root),
         "transactions" => JsonValue::new_array(),
         "witness_accounts" => JsonValue::new_object(),
@@ -96,7 +95,7 @@ fn batch_to_json_string(batch: &BatchInput, indent: usize) -> String {
     }
 
     for (aid, acct) in batch.witness_accounts.iter() {
-        root["witness_accounts"][hex::encode(aid)] = object!{
+        root["witness_accounts"][hex::encode(aid)] = object! {
             "balance" => acct.balance,
             "nonce" => acct.nonce,
         };

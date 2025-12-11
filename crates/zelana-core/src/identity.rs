@@ -1,6 +1,8 @@
-use sha2::{Digest, Sha256};
-use std::fmt;
-use wincode_derive::{SchemaRead, SchemaWrite};
+use {
+    sha2::{Digest, Sha256},
+    std::fmt,
+    wincode_derive::{SchemaRead, SchemaWrite},
+};
 
 /// The canonical identifier for a user on L2 (32 bytes).
 /// Derived from H(SignerPK || PrivacyPK)

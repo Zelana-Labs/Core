@@ -1,14 +1,11 @@
-use sp1_sdk::SP1Stdin;
-use anyhow::Context;
-use wincode::SchemaWrite;
-
+use {anyhow::Context, sp1_sdk::SP1Stdin, wincode::SchemaWrite};
 
 /// Extension helpers to write wincode-serialized values into SP1Stdin
 pub trait SP1StdinWincode {
     /// Serialize `value` using wincode and write the resulting bytes to the SP1 stdin buffer.
     /// This avoids the serde::Serialize bound that `SP1Stdin::write` imposes.
     fn write_wincode<T>(&mut self, value: &T) -> anyhow::Result<()>
-    where 
+    where
         T: SchemaWrite<Src = T>;
 
     /// Write already-serialized bytes to SP1 stdin (thin wrapper around write_slice).
@@ -16,9 +13,10 @@ pub trait SP1StdinWincode {
 }
 
 impl SP1StdinWincode for SP1Stdin {
-    fn write_wincode<T>(&mut self, value: &T) -> anyhow::Result<()> 
+    fn write_wincode<T>(&mut self, value: &T) -> anyhow::Result<()>
     where
-        T:  SchemaWrite<Src = T>{
+        T: SchemaWrite<Src = T>,
+    {
         // wincode::serialize will require the generated SchemaWrite impl on T
         // but we don't need to mention any serde trait here.
         let bytes = wincode::serialize(value)
