@@ -1,7 +1,7 @@
 use {
     crate::{AccountId, L2Transaction},
     std::collections::HashMap,
-    wincode_derive::{SchemaRead, SchemaWrite},
+    wincode::{SchemaRead, SchemaWrite},
 };
 
 /// The input fed into the SP1 ZKVM.

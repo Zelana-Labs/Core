@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 zelana-core = { workspace = true }
 wincode = {workspace = true}
-wincode-derive = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 blake3 ={workspace = true}

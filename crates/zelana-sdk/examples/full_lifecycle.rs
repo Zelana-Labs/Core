@@ -8,7 +8,7 @@ use {
     solana_transaction::Transaction,
     std::{env, str::FromStr, time::Duration},
     tokio::time::sleep,
-    wincode_derive::SchemaWrite,
+    wincode::SchemaWrite,
     zelana_sdk::{AccountId, SignedTransaction, TransactionData, ZelanaClient},
 };
 

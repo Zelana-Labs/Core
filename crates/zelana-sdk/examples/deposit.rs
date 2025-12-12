@@ -6,7 +6,7 @@ use {
     solana_pubkey::Pubkey,
     solana_transaction::Transaction,
     std::{env, str::FromStr},
-    wincode_derive::SchemaWrite,
+    wincode::SchemaWrite,
 };
 
 // Define the struct manually to avoid circular deps with the bridge crate

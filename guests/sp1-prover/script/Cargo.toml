@@ -11,7 +11,6 @@ sp1-utils = {workspace = true}
 
 # Utils
 wincode = { workspace = true}
-wincode-derive = {workspace = true}
 clap = { version = "4.0", features = ["derive"] }
 tokio = { workspace = true, features = ["full"] }
 anyhow = { workspace = true }

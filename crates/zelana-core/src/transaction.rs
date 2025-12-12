@@ -1,6 +1,6 @@
 use {
     crate::identity::AccountId,
-    wincode_derive::{SchemaRead, SchemaWrite},
+    wincode::{SchemaRead, SchemaWrite},
 };
 
 /// The enum for all inputs to the L2 State Machine.

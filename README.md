@@ -125,19 +125,25 @@ cargo run -p zelana-sdk --example bench_throughput --release
 6. **Settlement:** Sequencer batches transactions → SP1 Prover → L1 proof.
 
 ---
+**Useful Commands**
 
-## Contributing
+**Fix:**
+
+```bash
+cargo fix --workspace
+```
+
 
 **Format:**
 
 ```bash
-cargo fmt
+cargo +nightly fmt --all
 ```
 
 **Lint:**
 
 ```bash
-cargo clippy --workspace
+cargo clippy --fix --all-targets -- -D warnings
 ```
 
 **Test:**

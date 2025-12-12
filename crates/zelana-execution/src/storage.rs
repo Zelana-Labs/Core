@@ -1,6 +1,6 @@
 use {
     anyhow::Result,
-    wincode_derive::{SchemaRead, SchemaWrite},
+    wincode::{SchemaRead, SchemaWrite},
     zelana_core::AccountId,
 };
 

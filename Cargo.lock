@@ -3984,12 +3984,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "json"
-version = "0.12.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
-
-[[package]]
 name = "jsonrpc-core"
 version = "18.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8327,7 +8321,6 @@ dependencies = [
  "sp1-utils",
  "tokio",
  "wincode",
- "wincode-derive",
  "x25519-dalek",
  "zelana-core",
  "zelana-execution",
@@ -9194,7 +9187,7 @@ dependencies = [
  "anyhow",
  "clap",
  "hex",
- "json",
+ "serde_json",
  "wincode",
  "zelana-core",
 ]
@@ -9775,6 +9768,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "thiserror 2.0.17",
+ "wincode-derive",
 ]
 
 [[package]]
@@ -10269,11 +10263,9 @@ dependencies = [
  "blake3",
  "ed25519-dalek",
  "hex",
- "serde",
  "sha2",
  "thiserror 2.0.17",
  "wincode",
- "wincode-derive",
  "x25519-dalek",
 ]
 
@@ -10285,7 +10277,6 @@ dependencies = [
  "blake3",
  "thiserror 2.0.17",
  "wincode",
- "wincode-derive",
  "zelana-core",
 ]
 
@@ -10323,7 +10314,6 @@ dependencies = [
  "thiserror 2.0.17",
  "tokio",
  "wincode",
- "wincode-derive",
  "x25519-dalek",
  "zelana-core",
  "zelana-net",

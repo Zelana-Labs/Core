@@ -12,6 +12,6 @@ anyhow = {workspace = true}
 zelana-core = { workspace = true}
 wincode = { workspace = true}
 hex = "0.4.3"
-json = "0.12.1"
+serde_json = {workspace = true}
 clap = { version = "4.0", features = ["derive"] }
 

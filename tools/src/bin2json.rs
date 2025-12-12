@@ -1,7 +1,7 @@
 use {
     anyhow::Context,
     clap::Parser,
-    json::{object, JsonValue},
+    serde_json::{json, Value},
     std::{
         fs::File,
         io::{self, Read, Write},
@@ -31,25 +31,27 @@ struct Args {
     indent: usize,
 }
 
-fn signed_tx_to_json(signed: &SignedTransaction) -> JsonValue {
+fn signed_tx_to_json(signed: &SignedTransaction) -> Value {
     let d = &signed.data;
-    object! {
-        "data" => object!{
-            "from" => hex::encode(d.from),
-            "to" => hex::encode(d.to),
-            "amount" => d.amount,
-            "nonce" => d.nonce,
-            "chain_id" => d.chain_id,
+    json! ({
+        "data": {
+            "from" : hex::encode(d.from),
+            "to" : hex::encode(d.to),
+            "amount" : d.amount,
+            "nonce" : d.nonce,
+            "chain_id" : d.chain_id,
         },
-        "signature" => hex::encode(&signed.signature),
-        "signer_pubkey" => hex::encode(signed.signer_pubkey),
-    }
+        "signature" : hex::encode(&signed.signature),
+        "signer_pubkey" : hex::encode(signed.signer_pubkey),
+    })
 }
 
-fn l2tx_to_json(tx: &L2Transaction) -> JsonValue {
+fn l2tx_to_json(tx: &L2Transaction) -> Value {
     match tx {
-        L2Transaction::Transfer(signed) => object! { "Transfer" => signed_tx_to_json(signed) },
-        other => JsonValue::String(format!("{:?}", other)),
+        L2Transaction::Transfer(signed) => json!({
+            "Transfer": signed_tx_to_json(signed)
+        }),
+        other => Value::String(format!("{:?}", other)),
     }
 }
 
@@ -84,27 +86,39 @@ fn write_output(output: &Option<PathBuf>, s: &str) -> anyhow::Result<()> {
 }
 
 fn batch_to_json_string(batch: &BatchInput, indent: usize) -> String {
-    let mut root = object! {
-        "pre_state_root" => hex::encode(batch.pre_state_root),
-        "transactions" => JsonValue::new_array(),
-        "witness_accounts" => JsonValue::new_object(),
-    };
+    let mut root = json!({
+        "pre_state_root": hex::encode(batch.pre_state_root),
+        "transactions": [],
+        "witness_accounts": {}
+    });
 
-    for tx in &batch.transactions {
-        root["transactions"].push(l2tx_to_json(tx)).ok();
+    // Push transactions
+    if let Some(arr) = root.get_mut("transactions").and_then(|v| v.as_array_mut()) {
+        for tx in &batch.transactions {
+            arr.push(l2tx_to_json(tx));
+        }
     }
 
-    for (aid, acct) in batch.witness_accounts.iter() {
-        root["witness_accounts"][hex::encode(aid)] = object! {
-            "balance" => acct.balance,
-            "nonce" => acct.nonce,
-        };
+    // Insert witness accounts
+    if let Some(map) = root
+        .get_mut("witness_accounts")
+        .and_then(|v| v.as_object_mut())
+    {
+        for (aid, acct) in batch.witness_accounts.iter() {
+            map.insert(
+                hex::encode(aid),
+                json!({
+                    "balance": acct.balance,
+                    "nonce": acct.nonce,
+                }),
+            );
+        }
     }
-    let ident_u16 = u16::try_from(indent).expect("error while converthing to u16");
+
     if indent == 0 {
-        json::stringify(root)
+        serde_json::to_string(&root).unwrap()
     } else {
-        json::stringify_pretty(root, ident_u16)
+        serde_json::to_string_pretty(&root).unwrap()
     }
 }
 

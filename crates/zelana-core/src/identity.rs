@@ -1,7 +1,7 @@
 use {
     sha2::{Digest, Sha256},
     std::fmt,
-    wincode_derive::{SchemaRead, SchemaWrite},
+    wincode::{SchemaRead, SchemaWrite},
 };
 
 /// The canonical identifier for a user on L2 (32 bytes).
